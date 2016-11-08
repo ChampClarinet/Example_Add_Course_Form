@@ -318,16 +318,20 @@ public class AddCourseActivity extends AppCompatActivity {
 
         if (id == R.id.action_add_course) {
             Log.i(TAG, "save menu triggered");
-            encapData();
-            confirmation();
+            if(encapData()) confirmation();
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void encapData() {
+    private boolean encapData() {
+        Log.i(TAG, "encapsulating");
         String courseName = newCourseName.getText().toString();
-        if(courseName.length() == 0) new uncompleteFieldAlert(this).alert();
+        Log.i("courseNameLength", Integer.toString(courseName.length()));
+        if(courseName.length() == 0) {
+            new uncompleteFieldAlert(this).alert();
+            return false;
+        }
         String courseDescS = courseDesc.getText().toString();
         if(courseDescS.length() == 0) courseDescS = null;
         String learnS = Time.timeJoiner(courseStartH, courseStartM);
@@ -353,14 +357,8 @@ public class AddCourseActivity extends AppCompatActivity {
         cv.put(COLTESTFINISH, testF);
         cv.put(COLCOURSEDESC, courseDescS);
 
-        Log.i(COLCOURSENAME, courseName);
-        Log.i(COLCOURSEDAY, courseDay);
-        Log.i(COLCOURSESTART, learnS);
-        Log.i(COLCOURSEEND, learnF);
-        Log.i(COLTESTDAY, testDay);
-        Log.i(COLTESTSTART, testS);
-        Log.i(COLTESTFINISH, testF);
-        Log.i(COLCOURSEDESC, courseDescS);
+        return true;
+
     }
 
     private void confirmation() {
@@ -389,8 +387,10 @@ public class AddCourseActivity extends AppCompatActivity {
     private String printData() {
         String s = "Adding course "+cv.getAsString(COLCOURSENAME)+"\n"+
                 "learn on "+cv.getAsString(COLCOURSEDAY)+" "+cv.getAsString(COLCOURSESTART)+" - "+cv.getAsString(COLCOURSEEND)+"\n"+
-                "test on "+cv.getAsString(COLTESTDAY)+" "+cv.getAsString(COLTESTSTART)+" - "+cv.getAsString(COLTESTFINISH)+"\n"+
-                "Description : "+cv.getAsString(COLCOURSEDESC);
+                "test on "+cv.getAsString(COLTESTDAY)+" "+cv.getAsString(COLTESTSTART)+" - "+cv.getAsString(COLTESTFINISH)+"\n";
+        String desc = cv.getAsString(COLCOURSEDESC);
+        if(desc == null) s+="Description : <not set>";
+        else s += "Description : "+desc;
         return s;
     }
 
