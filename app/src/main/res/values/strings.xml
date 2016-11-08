@@ -31,4 +31,8 @@
     <string name="day">Day</string>
     <string name="title_activity_schedule">Schedule</string>
     <string name="save">SAVE</string>
+    <string name="confirm">Confirmation</string>
+    <string name="conMessage">Please check your detail again</string>
+    <string name="yes">YES</string>
+    <string name="back">BACK</string>
 </resources>

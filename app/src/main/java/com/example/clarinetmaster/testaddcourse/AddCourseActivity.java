@@ -2,8 +2,10 @@ package com.example.clarinetmaster.testaddcourse;
 
 import android.app.Activity;
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -40,6 +42,9 @@ import static com.example.clarinetmaster.testaddcourse.Info.Time.MINUTE;
 public class AddCourseActivity extends AppCompatActivity {
 
     private static final String TAG = "ADD_COURSE_ACTIVITY";
+
+    private ContentValues cv;
+
     private EditText newCourseName;
     private Spinner learnDaySpinner;
     private Spinner testDaySpinner;
@@ -295,6 +300,32 @@ public class AddCourseActivity extends AppCompatActivity {
     }
 
     private void addToDB(){
+        db.insert(TBLCOURSE, null, cv);
+        startActivity(new Intent(this, testDatabase.class));
+        finish();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.course_add_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_add_course) {
+            Log.i(TAG, "save menu triggered");
+            encapData();
+            confirmation();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void encapData() {
         String courseName = newCourseName.getText().toString();
         if(courseName.length() == 0) new uncompleteFieldAlert(this).alert();
         String courseDescS = courseDesc.getText().toString();
@@ -312,7 +343,7 @@ public class AddCourseActivity extends AppCompatActivity {
                 courseDescS
         );
 
-        ContentValues cv = new ContentValues();
+        cv = new ContentValues();
         cv.put(COLCOURSENAME, courseName);
         cv.put(COLCOURSEDAY, courseDay);
         cv.put(COLCOURSESTART, learnS);
@@ -322,28 +353,45 @@ public class AddCourseActivity extends AppCompatActivity {
         cv.put(COLTESTFINISH, testF);
         cv.put(COLCOURSEDESC, courseDescS);
 
-        db.insert(TBLCOURSE, null, cv);
+        Log.i(COLCOURSENAME, courseName);
+        Log.i(COLCOURSEDAY, courseDay);
+        Log.i(COLCOURSESTART, learnS);
+        Log.i(COLCOURSEEND, learnF);
+        Log.i(COLTESTDAY, testDay);
+        Log.i(COLTESTSTART, testS);
+        Log.i(COLTESTFINISH, testF);
+        Log.i(COLCOURSEDESC, courseDescS);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.course_add_menu, menu);
-        return true;
+    private void confirmation() {
+        Log.i(TAG, "confirmMethod");
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+        dialog.setTitle(R.string.confirm);
+        dialog.setMessage(getResources().getString(R.string.conMessage)+"\n"+printData());
+        dialog.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Log.i(TAG, "PositiveDialogButton triggered");
+                addToDB();
+                dialog.dismiss();
+            }
+        });
+        dialog.setNegativeButton(R.string.back, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Log.i(TAG, "NegativeDialogButton triggered");
+                dialog.dismiss();
+            }
+        });
+        dialog.show();
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == R.id.action_add_course) {
-            Log.i(TAG, "save menu triggered, adding to DB");
-            addToDB();
-            startActivity(new Intent(this, testDatabase.class));
-            //finish();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+    private String printData() {
+        String s = "Adding course "+cv.getAsString(COLCOURSENAME)+"\n"+
+                "learn on "+cv.getAsString(COLCOURSEDAY)+" "+cv.getAsString(COLCOURSESTART)+" - "+cv.getAsString(COLCOURSEEND)+"\n"+
+                "test on "+cv.getAsString(COLTESTDAY)+" "+cv.getAsString(COLTESTSTART)+" - "+cv.getAsString(COLTESTFINISH)+"\n"+
+                "Description : "+cv.getAsString(COLCOURSEDESC);
+        return s;
     }
 
     private ArrayList<String> day(){
